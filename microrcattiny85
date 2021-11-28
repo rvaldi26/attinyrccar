@@ -1,0 +1,76 @@
+#include <SoftwareSerial.h>  //Software Serial Port
+#define RxD 4
+#define TxD 5
+
+#define DEBUG_ENABLED  1
+ 
+SoftwareSerial blueToothSerial(RxD,TxD);
+
+int motor1 = 3; //forward
+int motor2 = 2; //backward
+int motor3 = 1; // turn left
+int motor4 = 0; // turn right
+
+void setup() 
+{ 
+  pinMode(RxD, INPUT);
+  pinMode(TxD, OUTPUT);
+  setupBlueToothConnection();
+  
+  // set motor off
+  pinMode(motor1,OUTPUT); 
+  digitalWrite(motor1,LOW);
+  pinMode(motor2,OUTPUT);
+  digitalWrite(motor2,LOW);
+  pinMode(motor3,OUTPUT);
+  digitalWrite(motor3,LOW);
+  pinMode(motor4,OUTPUT);
+  digitalWrite(motor4,LOW);
+} 
+ 
+void loop() 
+{
+  char recvChar;
+  while(1){
+    //check if there's any data sent from the remote bluetooth shield
+    if(blueToothSerial.available()){
+      recvChar = blueToothSerial.read();
+    
+        if(recvChar == 'F')
+          digitalWrite(motor1,HIGH);
+        else
+          digitalWrite(motor1,LOW); 
+          
+        if(recvChar == 'B')
+          digitalWrite(motor2,HIGH);  
+        else
+          digitalWrite(motor2,LOW);
+          
+        if(recvChar == 'L')
+          analogWrite(motor3,HIGH);  
+        else
+          analogWrite(motor3,LOW); 
+
+        if(recvChar == 'R')
+          digitalWrite(motor4,HIGH);  
+        else
+          digitalWrite(motor4,LOW);
+    }
+  }
+} 
+
+void setupBlueToothConnection()
+{
+  blueToothSerial.begin(9600); //Set BluetoothBee BaudRate to default baud rate 38400
+  blueToothSerial.print("\r\n+STWMOD=0\r\n"); //set the bluetooth work in slave mode
+  blueToothSerial.print("\r\n+STNA=HC-05\r\n"); //set the bluetooth name as "HC-05"
+  blueToothSerial.print("\r\n+STOAUT=1\r\n"); // Permit Paired device to connect me
+  blueToothSerial.print("\r\n+STAUTO=0\r\n"); // Auto-connection should be forbidden here
+  
+  delay(2000); // This delay is required.
+  //blueToothSerial.print("\r\n+INQ=1\r\n"); //make the slave bluetooth inquirable 
+  blueToothSerial.print("bluetooth connected!\n");
+  
+  delay(2000); // This delay is required.
+  blueToothSerial.flush();
+}
